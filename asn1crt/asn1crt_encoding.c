@@ -523,34 +523,8 @@ static void BitStream_EncodeNonNegativeInteger32Neg(BitStream* pBitStrm,
 	asn1SccUint32 v,
 	flag negate)
 {
-	int cc;
-	asn1SccUint32 curMask;
+	int cc = v?(sizeof(v)*8 - __builtin_clz(v)):0;
 	int pbits;
-
-	if (v == 0)
-		return;
-
-	if (v<0x100) {
-		cc = 8;
-		curMask = 0x80;
-	}
-	else if (v<0x10000) {
-		cc = 16;
-		curMask = 0x8000;
-	}
-	else if (v<0x1000000) {
-		cc = 24;
-		curMask = 0x800000;
-	}
-	else {
-		cc = 32;
-		curMask = 0x80000000;
-	}
-
-	while ((v & curMask) == 0) {
-		curMask >>= 1;
-		cc--;
-	}
 
 	pbits = cc % 8;
 	if (pbits) {
@@ -665,28 +639,7 @@ void BitStream_EncodeNonNegativeIntegerNeg(BitStream* pBitStrm, asn1SccUint v, f
 
 static int GetNumberOfBitsForNonNegativeInteger32(asn1SccUint32 v)
 {
-	int ret = 0;
-
-	if (v<0x100) {
-		ret = 0;
-	}
-	else if (v<0x10000) {
-		ret = 8;
-		v >>= 8;
-	}
-	else if (v<0x1000000) {
-		ret = 16;
-		v >>= 16;
-	}
-	else {
-		ret = 24;
-		v >>= 24;
-	}
-	while (v>0) {
-		v >>= 1;
-		ret++;
-	}
-	return ret;
+	return v?(sizeof(v)*8 - __builtin_clz(v)):0
 }
 
 int GetNumberOfBitsForNonNegativeInteger(asn1SccUint v)
